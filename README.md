@@ -14,6 +14,19 @@ dotnet tool install -g dotnet10-hybrid-tool
 dotnet10-hybrid-tool
 ```
 
+## Native AOT Performance
+
+```bash
+$ time dotnet10-hybrid-tool
+Hi, I'm a 'DotNetCliTool v2' tool!
+Yes, I'm quite fancy.
+
+Version: .NET 10.0.2
+RID: osx-arm64
+Mode: Native AOT
+dotnet10-hybrid-tool  0.00s user 0.01s system 60% cpu 0.015 total
+```
+
 ## Output
 
 The tool displays:

@@ -20,11 +20,15 @@ fi
 # Clean function that handles root-owned files from docker
 clean_build() {
     # Use docker to clean in case files are owned by root
-    docker run --rm -v "$SCRIPT_DIR:/src" -w /src $AOT_IMAGE rm -rf bin obj
+    # Use find + rm to handle nested directories more reliably
+    docker run --rm -v "$SCRIPT_DIR:/src" -w /src $AOT_IMAGE \
+        bash -c 'find bin obj -mindepth 1 -delete 2>/dev/null || true; rm -rf bin obj'
 }
 
 # Clean previous builds
-docker run --rm -v "$SCRIPT_DIR:/src" -w /src $AOT_IMAGE rm -rf bin obj packages
+# Use find + rm to handle nested directories more reliably
+docker run --rm -v "$SCRIPT_DIR:/src" -w /src $AOT_IMAGE \
+    bash -c 'find bin obj packages -mindepth 1 -delete 2>/dev/null || true; rm -rf bin obj packages'
 mkdir -p "$PACKAGES_DIR"
 
 echo "=== Step 1: Create pointer package (full pack) ==="
