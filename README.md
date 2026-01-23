@@ -17,6 +17,7 @@ dotnet10-hybrid-tool
 ## Output
 
 The tool displays:
+
 - Runtime framework description
 - Runtime identifier (RID)
 - Compilation mode (Native AOT or CoreCLR)
@@ -42,12 +43,15 @@ This project demonstrates a hybrid approach to RID-specific .NET tool packaging 
 ### The Pattern
 
 1. **Use `ToolPackageRuntimeIdentifiers` with `PublishAot=true`**
-   
+
    Setting `ToolPackageRuntimeIdentifiers` (rather than `RuntimeIdentifiers`) with `PublishAot=true` causes `dotnet pack` to generate only a pointer package with metadata. It does NOT generate RID-specific packages automatically because AOT compilation doesn't support cross-compilation across operating systems (only architectures).
 
 2. **Generate Native AOT packages for desired RIDs**
-   
-   Run `dotnet pack -r <RID>` on each target platform to build Native AOT binaries:
+
+   Run `dotnet pack -r <RID>` on each target platform to build Native AOT binaries.
+
+   For example:
+
    ```bash
    dotnet pack -r osx-arm64      # on macOS
    dotnet pack -r linux-arm64    # on Linux ARM or in container
@@ -55,12 +59,13 @@ This project demonstrates a hybrid approach to RID-specific .NET tool packaging 
    ```
 
 3. **Generate CoreCLR fallback with `-r any`**
-   
+
    Pack the `any` RID with `-p:PublishAot=false` to create a portable CoreCLR package:
+
    ```bash
    dotnet pack -r any -p:PublishAot=false
    ```
-   
+
    Order of the steps doesn't matter.
 
 ### Why This Works
@@ -85,11 +90,12 @@ In contrast, if you use `RuntimeIdentifiers` (not `ToolPackageRuntimeIdentifiers
 
 This demo was created on an Apple M4 machine, which influenced the platform choices:
 
-- **macOS ARM64 (`osx-arm64`)**: Built natively on the M4 host, making it the natural first target
-- **Linux ARM64 (`linux-arm64`)**: Built using the `mcr.microsoft.com/dotnet/sdk:10.0-noble-aot` Docker container, which runs natively on Apple Silicon
+- **macOS Arm64 (`osx-arm64`)**: Built natively on the M4 host, making it the natural first target
+- **Linux Arm64 (`linux-arm64`)**: Built using the `mcr.microsoft.com/dotnet/sdk:10.0-noble-aot` Docker container, which runs natively on Apple Silicon
 - **Linux x64 (`linux-x64`)**: Built using the same container with `--platform linux/amd64`, relying on Docker's emulation support (Rosetta 2) for cross-architecture builds
 
 The complete build process is automated in [`build-packages.sh`](build-packages.sh), which demonstrates:
+
 1. Creating the pointer package
 2. Building Native AOT packages for each Linux RID using containers
 3. Building the Native AOT package for macOS natively
@@ -104,11 +110,13 @@ This demo doesn't include a Windows Native AOT build because:
 3. The `any` CoreCLR fallback package provides Windows support, just without AOT optimizations
 
 **Tip for Windows users**: You can experience both variants on the same machine:
+
 - Install the tool on Windows to use the CoreCLR fallback (`any` RID)
 - Install the same tool in WSL to use the Native AOT Linux build (`linux-x64` or `linux-arm64`)
 - Compare startup time and memory usage between the two!
 
 For production tools that need Windows AOT support, you would need to either:
+
 - Build on a Windows machine or Windows CI runner
 - Use a multi-platform CI/CD pipeline (GitHub Actions, Azure Pipelines, etc.) that builds on Windows, Linux, and macOS
 
