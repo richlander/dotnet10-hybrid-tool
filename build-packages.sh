@@ -57,6 +57,11 @@ docker run --rm --platform linux/amd64 \
     dotnet pack $PACK_ARGS -r linux-x64 -o /src/packages
 
 echo ""
+echo "=== Step 5: Rebuild runtime packages with PublishAot disabled ==="
+clean_build
+dotnet pack $PACK_ARGS -r any -p:PublishAot=false -o "$PACKAGES_DIR"
+
+echo ""
 echo "=== Build complete ==="
 echo ""
 echo "Packages:"

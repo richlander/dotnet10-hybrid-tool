@@ -10,13 +10,14 @@
     <ToolCommandName>dotnet10-hybrid-tool</ToolCommandName>
 
     <!-- RIDs: CoreCLR fallback + Native AOT targets -->
-    <RuntimeIdentifiers>any;osx-arm64;linux-arm64;linux-x64</RuntimeIdentifiers>
+    <ToolPackageRuntimeIdentifiers>any;osx-arm64;linux-arm64;linux-x64</ToolPackageRuntimeIdentifiers>
 
     <!-- Package metadata -->
     <PackageId>dotnet10-hybrid-tool</PackageId>
     <VersionPrefix>1.0.0</VersionPrefix>
     <Authors>Richard Lander</Authors>
     <Description>A demo .NET tool showing RID-specific packaging with Native AOT and CoreCLR as fallback.</Description>
+    <PublishAot>true</PublishAot>
   </PropertyGroup>
 
   <!-- SourceLink and reproducible build settings for official builds -->
