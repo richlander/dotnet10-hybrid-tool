@@ -7,30 +7,26 @@
 
     <!-- Package as .NET Tool -->
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>hellorid</ToolCommandName>
+    <ToolCommandName>dotnet10-hybrid-tool</ToolCommandName>
 
     <!-- RIDs: CoreCLR fallback + Native AOT targets -->
     <RuntimeIdentifiers>any;osx-arm64;linux-arm64;linux-x64</RuntimeIdentifiers>
 
     <!-- Package metadata -->
-    <PackageId>HelloRid</PackageId>
+    <PackageId>dotnet10-hybrid-tool</PackageId>
     <VersionPrefix>1.0.0</VersionPrefix>
-    <Authors>Your Name</Authors>
-    <Description>A demo .NET tool showing RID-specific packaging with Native AOT</Description>
+    <Authors>Richard Lander</Authors>
+    <Description>A demo .NET tool showing RID-specific packaging with Native AOT and CoreCLR as fallback.</Description>
   </PropertyGroup>
 
   <!-- SourceLink and reproducible build settings for official builds -->
   <PropertyGroup Condition="'$(OfficialBuild)' == 'true'">
+    <DebugType>embedded</DebugType>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <Deterministic>true</Deterministic>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-  </PropertyGroup>
-
-  <!-- Embedded PDB for CoreCLR builds (not AOT since we strip symbols) -->
-  <PropertyGroup Condition="'$(OfficialBuild)' == 'true' and '$(PublishAot)' != 'true'">
-    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(OfficialBuild)' == 'true'">
@@ -39,19 +35,11 @@
 
   <!-- Native AOT for specific RIDs -->
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-arm64' or '$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'linux-arm64'">
+    <DefineConstants>$(DefineConstants);NATIVE_AOT</DefineConstants>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <OptimizationPreference>Size</OptimizationPreference>
     <PublishAot>true</PublishAot>
     <StripSymbols>true</StripSymbols>
-    <DefineConstants>$(DefineConstants);NATIVE_AOT</DefineConstants>
   </PropertyGroup>
-
-  <!-- Remove debug symbols after publish to keep package small -->
-  <!-- macOS: .dSYM directory -->
-  <Target Name="RemoveDsym" AfterTargets="_CopyAotSymbols" Condition="$(RuntimeIdentifier.StartsWith('osx'))">
-    <Exec Command="rm -rf '$(PublishDir)$(TargetName).dSYM'" />
-  </Target>
-  <!-- Linux: .dbg file -->
-  <Target Name="RemoveDbg" AfterTargets="_CopyAotSymbols" Condition="$(RuntimeIdentifier.StartsWith('linux'))">
-    <Delete Files="$(PublishDir)$(TargetName).dbg" />
-  </Target>
 
 </Project>
