@@ -31,19 +31,18 @@ docker run --rm -v "$SCRIPT_DIR:/src" -w /src $AOT_IMAGE \
     bash -c 'find bin obj packages -mindepth 1 -delete 2>/dev/null || true; rm -rf bin obj packages'
 mkdir -p "$PACKAGES_DIR"
 
-echo "=== Step 1: Create pointer package (full pack) ==="
+echo "=== Step 1: Create pointer package ==="
 echo "Git commit: ${GIT_COMMIT:-not available}"
-# This creates all packages including the pointer package
-# The RID packages will be CoreCLR (not AOT) but we'll replace them
+# With ToolPackageRuntimeIdentifiers, this only creates the pointer package
 dotnet pack $PACK_ARGS -o "$PACKAGES_DIR"
 
 echo ""
-echo "=== Step 2: Rebuild osx-arm64 with Native AOT ==="
+echo "=== Step 2: Build osx-arm64 with Native AOT ==="
 clean_build
 dotnet pack $PACK_ARGS -r osx-arm64 -o "$PACKAGES_DIR"
 
 echo ""
-echo "=== Step 3: Rebuild linux-arm64 with Native AOT (container) ==="
+echo "=== Step 3: Build linux-arm64 with Native AOT (container) ==="
 clean_build
 docker run --rm \
     -v "$SCRIPT_DIR:/src" \
@@ -52,7 +51,7 @@ docker run --rm \
     dotnet pack $PACK_ARGS -r linux-arm64 -o /src/packages
 
 echo ""
-echo "=== Step 4: Rebuild linux-x64 with Native AOT (container + emulation) ==="
+echo "=== Step 4: Build linux-x64 with Native AOT (container + emulation) ==="
 clean_build
 docker run --rm --platform linux/amd64 \
     -v "$SCRIPT_DIR:/src" \
@@ -61,7 +60,7 @@ docker run --rm --platform linux/amd64 \
     dotnet pack $PACK_ARGS -r linux-x64 -o /src/packages
 
 echo ""
-echo "=== Step 5: Rebuild runtime packages with PublishAot disabled ==="
+echo "=== Step 5: Build any runtime with CoreCLR ==="
 clean_build
 dotnet pack $PACK_ARGS -r any -p:PublishAot=false -o "$PACKAGES_DIR"
 

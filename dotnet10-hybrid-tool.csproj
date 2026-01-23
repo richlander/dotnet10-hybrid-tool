@@ -34,12 +34,11 @@
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
-  <!-- Native AOT for specific RIDs -->
-  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-arm64' or '$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'linux-arm64'">
+  <!-- Native AOT optimizations -->
+  <PropertyGroup Condition="'$(PublishAot)' == 'true'">
     <DefineConstants>$(DefineConstants);NATIVE_AOT</DefineConstants>
     <InvariantGlobalization>true</InvariantGlobalization>
     <OptimizationPreference>Size</OptimizationPreference>
-    <PublishAot>true</PublishAot>
     <StripSymbols>true</StripSymbols>
   </PropertyGroup>
 
