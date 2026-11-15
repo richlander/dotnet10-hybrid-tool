@@ -62,13 +62,17 @@ This project demonstrates a hybrid approach to RID-specific .NET tool packaging 
 2. **Generate Native AOT packages for desired RIDs**
 
    Run `dotnet pack -r <RID>` on each target platform to build Native AOT binaries.
+   For Linux packages intended for general distribution, use the matching .NET 10
+   or .NET 11 prereqs cross image, set `ROOTFS_DIR`, and pass
+   `-p:SysRoot=$ROOTFS_DIR` and `-p:LinkerFlavor=lld`. These images link against
+   the portable bionic (glibc 2.27) sysroot rather than the build host's newer
+   glibc.
 
    For example:
 
    ```bash
    dotnet pack -r osx-arm64      # on macOS
-   dotnet pack -r linux-arm64    # on Linux ARM or in container
-   dotnet pack -r linux-x64      # on Linux x64 or in container
+   # For Linux, use build-packages.sh or the equivalent cross-image setup.
    ```
 
 3. **Generate CoreCLR fallback with `-r any`**
@@ -104,8 +108,12 @@ In contrast, if you use `RuntimeIdentifiers` (not `ToolPackageRuntimeIdentifiers
 This demo was created on an Apple M4 machine, which influenced the platform choices:
 
 - **macOS Arm64 (`osx-arm64`)**: Built natively on the M4 host, making it the natural first target
-- **Linux Arm64 (`linux-arm64`)**: Built using the `mcr.microsoft.com/dotnet/sdk:10.0-noble-aot` Docker container, which runs natively on Apple Silicon
-- **Linux x64 (`linux-x64`)**: Built using the same container with `--platform linux/amd64`, relying on Docker's emulation support (Rosetta 2) for cross-architecture builds
+- **Linux Arm64 (`linux-arm64`)**: Built using the .NET 10 `cross-arm64` prereqs image and its `/crossrootfs/arm64` sysroot
+- **Linux x64 (`linux-x64`)**: Built using the .NET 10 `cross-amd64` prereqs image and its `/crossrootfs/x64` sysroot
+
+Both Linux cross images run as `linux/amd64`; Apple Silicon uses Docker's emulation to
+run the build tools. NativeAOT links against the selected Linux sysroot, not the
+host distribution's libc.
 
 The complete build process is automated in [`build-packages.sh`](build-packages.sh), which demonstrates:
 
